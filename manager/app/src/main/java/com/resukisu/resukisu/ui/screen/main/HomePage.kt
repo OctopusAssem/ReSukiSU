@@ -15,6 +15,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.MenuBook
 import androidx.compose.material.icons.twotone.Android
 import androidx.compose.material.icons.twotone.Block
+import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.DeveloperBoard
 import androidx.compose.material.icons.twotone.Error
 import androidx.compose.material.icons.twotone.Extension
@@ -48,6 +50,7 @@ import androidx.compose.material.icons.twotone.VolunteerActivism
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuGroup
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.DropdownMenuPopup
@@ -70,6 +73,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -245,19 +249,63 @@ fun HomePage(
                         Spacer(modifier = Modifier.height(10.dp))
                     }
 
-                    if (!uiState.systemStatus.isOfficialSignature) {
+                    val unofficialPrefs = remember {
+                        context.getSharedPreferences("resukisu_ui", Context.MODE_PRIVATE)
+                    }
+                    var hideUnofficialNotice by remember {
+                        mutableStateOf(
+                            unofficialPrefs.getBoolean("hide_unofficial_notice", false)
+                        )
+                    }
+                    var unofficialNoticeDontShowAgain by remember { mutableStateOf(true) }
+
+                    if (!uiState.systemStatus.isOfficialSignature && !hideUnofficialNotice) {
                         WarningCard(
                             message = stringResource(
                                 R.string.unofficial_version_notice,
                                 stringResource(R.string.app_name)
                             ),
+                            color = MaterialTheme.colorScheme.surfaceVariant,
                             icon = {
                                 Icon(
-                                    imageVector = Icons.TwoTone.Error,
+                                    imageVector = Icons.TwoTone.Info,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onErrorContainer,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(18.dp)
                                 )
+                            },
+                            content = {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Checkbox(
+                                        checked = unofficialNoticeDontShowAgain,
+                                        onCheckedChange = {
+                                            unofficialNoticeDontShowAgain = it
+                                        }
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.unofficial_notice_dont_show),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            if (unofficialNoticeDontShowAgain) {
+                                                unofficialPrefs.edit()
+                                                    .putBoolean("hide_unofficial_notice", true)
+                                                    .apply()
+                                            }
+                                            hideUnofficialNotice = true
+                                        }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.TwoTone.Close,
+                                            contentDescription = stringResource(android.R.string.cancel),
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                }
                             }
                         )
                         Spacer(modifier = Modifier.height(10.dp))

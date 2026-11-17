@@ -36,10 +36,10 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Pin manager version to the kernel's code (35262)
+      - name: Pin manager version to the kernel's code (35265)
         run: |
           grep -n 'managerVersionCode' build.gradle.kts
-          sed -i 's/extra\["managerVersionCode"\] = 30000 + getGitCommitCount() + 700/extra["managerVersionCode"] = 35262/' build.gradle.kts
+          sed -i 's/extra\["managerVersionCode"\] = 30000 + getGitCommitCount() + 700/extra["managerVersionCode"] = 35265/' build.gradle.kts
           grep -n 'managerVersionCode' build.gradle.kts
 
       - name: Build APK
